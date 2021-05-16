@@ -1,7 +1,16 @@
-import React ,{useState} from 'react';
-import ReactDOM from 'react-dom';
+import React ,{useState,Fragment} from 'react';
+import { connect } from 'react-redux';
 
-export const Register =() => {
+
+import {Redirect} from 'react-router-dom'
+import  {register}  from '../actions/auth';
+import PropTypes from 'prop-types';
+
+import '../styles/register.css'
+
+
+
+export const Register =({isAuthenticated}) => {
 const [FormData,setFormData] = useState({
     Name : '',
     username : '',
@@ -10,17 +19,26 @@ const [FormData,setFormData] = useState({
     admin : false
 
 });
-const {Name,username,email,password,admin} = FormData;
-
-    const onChange = e => {
+const {Name,username,email,password} = FormData;
+    
+const onChange = async e => {
         setFormData({...FormData,[e.target.name] : e.target.value})
     }
-    const onSubmit = e => {
+    const onSubmit =async  e => {
         e.preventDefault();
-        console.log(FormData);
+       // register(FormData);
+     console.log(FormData);
+     console.log(register());
+    register(FormData);
+    
+        
     }
+    if(isAuthenticated){
+        <Redirect to="/home"/>
+    }
+    
     return (
-        <div>
+        <Fragment>
         <form onSubmit = {e => onSubmit(e)}>
             <label for = "Name">Name</label>
             <input
@@ -30,39 +48,50 @@ const {Name,username,email,password,admin} = FormData;
               value = {Name}
               onChange = {e => onChange(e)}
               
-              required/>
+              required/><br/>
             <label for = "username">Username</label> 
             <input type = "text" 
             placeholder = "Username"
             name = "username"
             value = {username}
             onChange = {e => onChange(e)}
-             required/>
+             required/><br/>
             <label for = "email">email</label>
             <input type = "text"
              name = "email"
              value = {email}
              onChange = {e => onChange(e)}
-             required/>
+             required/><br/>
             <label for = "password">password</label>
             <input type = "text"
              name = "password"
              value = {password}
              onChange = {e => onChange(e)}
-             required/>
-            <label for="admin">company</label>
-            <input type="radio" 
+             required/><br/>
+            
+            <input type="checkbox" 
             id="admin" 
-            name="admin" value={admin}
+            name="admin" value="true"
             onChange = {e => onChange(e)}/>
-                <input type = "submit" value = "submit"/>
+            <label for="admin">Are you a candidate</label><br/>
+            <input type = "submit" value = "submit"/>
 
 
 
 
 
         </form>
-        </div>
+        </Fragment>
 )
 }
-export default Register;
+Register.propTypes = {
+    isAuthenticated : PropTypes.bool,
+    register: PropTypes.func.isRequired,
+        
+    
+}
+
+const mapStateToProps = (state) => ({
+    isAuthenticated: state.auth.isAuthenticated
+  });
+export default connect(mapStateToProps,{register})(Register);
