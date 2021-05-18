@@ -1,9 +1,10 @@
 import React ,{useState,Fragment} from 'react';
 import { connect } from 'react-redux';
-
+import axios from 'axios';
+import setauthtoken from '../utilities/setauthtoken';
 
 import {Redirect} from 'react-router-dom'
-import  {register}  from '../actions/auth';
+//import  {register}  from '../actions/auth';
 import PropTypes from 'prop-types';
 
 import '../styles/register.css'
@@ -12,14 +13,14 @@ import '../styles/register.css'
 
 export const Register =({isAuthenticated}) => {
 const [FormData,setFormData] = useState({
-    Name : '',
+    name : '',
     username : '',
     email : '',
     password:'',
     admin : false
 
 });
-const {Name,username,email,password} = FormData;
+const {name,username,email,password,admin} = FormData;
     
 const onChange = async e => {
         setFormData({...FormData,[e.target.name] : e.target.value})
@@ -28,24 +29,42 @@ const onChange = async e => {
         e.preventDefault();
        // register(FormData);
      console.log(FormData);
-     console.log(register());
-    register(FormData);
+     // register(Formdata);
+      const body = JSON.stringify({name,username,email,password,admin});
+      console.log(body);
+     
+      try {
+         
+          const res = await axios.post("http://localhost:3000/register/",body,{headers:{
+             'Content-Type': 'application/json'
+          }})
+
+          console.log(res.data);
+          localStorage.setItem('token',res.data.token);
+          console.log(typeof(res.data.token));
+        
+          
+          
+          isAuthenticated = true;
+      } catch (err) {
+          console.log(err.response.data.errors);
+      }
     
         
     }
-    if(isAuthenticated){
-        <Redirect to="/home"/>
-    }
+    //if(isAuthenticated){
+      //  <Redirect to="/home"/>
+    //}
     
     return (
         <Fragment>
         <form onSubmit = {e => onSubmit(e)}>
-            <label for = "Name">Name</label>
+            <label for = "name">Name</label>
             <input
              type = "text"
-             placeholder = "Name"
-              name = "Name"
-              value = {Name}
+             placeholder = "name"
+              name = "name"
+              value = {name}
               onChange = {e => onChange(e)}
               
               required/><br/>
@@ -84,14 +103,14 @@ const onChange = async e => {
         </Fragment>
 )
 }
-Register.propTypes = {
-    isAuthenticated : PropTypes.bool,
-    register: PropTypes.func.isRequired,
+// Register.propTypes = {
+//     isAuthenticated : PropTypes.bool,
+//     register: PropTypes.func.isRequired,
         
     
-}
+// }
 
-const mapStateToProps = (state) => ({
-    isAuthenticated: state.auth.isAuthenticated
-  });
-export default connect(mapStateToProps,{register})(Register);
+// const mapStateToProps = (state) => ({
+//     isAuthenticated: state.auth.isAuthenticated
+//   });
+export default Register;
